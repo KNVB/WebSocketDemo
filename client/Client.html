@@ -1,0 +1,173 @@
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<script src="http://code.jquery.com/jquery-3.2.1.js"></script>
+        <script language="JavaScript" type="text/javascript" src="js/JsEncrypt.js"></script>
+        <script src="js/cryptojs/rollups/aes.js"></script>
+		<script src="js/cryptojs/components/mode-ctr-min.js"></script>
+		<script src="js/cryptojs/components/pad-nopadding.js"></script>
+		<script language="JavaScript" src="js/MessageCoder.js"></script>
+		<script language=javascript>
+			var webSocketServer;
+			class WebSocketServer
+			{
+				constructor(url)
+				{
+					this.ws;
+					this.messageCoder;
+					this.decodedMessage;
+					this.url=url;
+					this.isFirstConnect=true;
+				}
+				connect()
+				{
+					var self=this;
+					this.ws = new WebSocket(this.url);
+					this.ws.onopen=function()
+									{	
+										self.sendPublicKey();
+										self.initCoder().then(function()
+																{
+																	if (self.messageCoder!=null)
+																		updateClientStatus("Message Coder is initialized successfully.");
+																	else
+																		updateClientStatus("Message Coder initialization failure.");
+																});															  
+									}
+					this.ws.onerror=function(e)
+									{
+										updateClientStatus("An error occcur:"+e);
+									}
+					this.ws.onclose=function(e)
+									{
+										updateClientStatus("Connection closed,closeEvent.wasClean:"+e.wasClean);
+									}
+				}
+				disConnect()
+				{
+					if (this.ws != null)
+					{	
+						this.ws.close();
+						this.isFirstConnect=true;
+						updateClientStatus("Connection closed.");
+					}
+				}
+				sendPublicKey()
+				{
+					updateClientStatus("Connection established.");
+					this.keyCoder = new JSEncrypt({
+						default_key_size: 2048
+					});
+					var dt = new Date();
+					var time = -(dt.getTime());
+					this.keyCoder.getKey();
+					this.ws.send(this.keyCoder.getPublicKey());
+					updateClientStatus("Public key sent.");
+					this.keyCoder.setPrivateKey(this.keyCoder.getPrivateKey());
+				}
+				sendMessage(message)
+				{
+					var self=this;
+					this.ws.send(this.messageCoder.encode(message));
+				}
+				getServerResponse()
+				{
+					var self=this;
+					return new Promise((resolve, reject) =>{
+							self.ws.onmessage = (e) =>{
+								var serverResponseMessage = e.data;
+								resolve(self.messageCoder.decode(serverResponseMessage));
+							}
+						});
+				}
+				initCoder()
+				{
+					var self=this;
+					
+					return new Promise((resolve, reject) => {
+						self.ws.onmessage = (e) => {
+							var serverResponseMessage = e.data;
+							var decodedServerResponseMessage = self.keyCoder.decrypt(serverResponseMessage);
+							updateServerResponse("decoded AES key="+decodedServerResponseMessage);
+							var aesKey=JSON.parse(decodedServerResponseMessage);
+							self.messageCoder=new MessageCoder(aesKey.messageKey,aesKey.ivText);
+							resolve();
+						}
+					})
+				}							
+			}
+			
+			function connect()
+			{
+				$("#status").val("");
+				$("#serverResponse").val("");
+				var serverAddress=document.getElementById("serverAddress").value; 
+				webSocketServer=new WebSocketServer(serverAddress);
+				webSocketServer.connect();
+			}
+			function sendMessage()
+			{
+				var message=document.getElementById("msg").value;
+				webSocketServer.sendMessage(message);
+				updateClientStatus("Message="+message+" sent to server.");
+				webSocketServer.getServerResponse().then(function(data)
+											{
+												updateServerResponse(data);
+											});
+			}			
+			function disConnect()
+			{
+				webSocketServer.disConnect();
+			}
+			function updateClientStatus(message)
+			{
+				var clientStatus=$("#status");
+				message=clientStatus.val()+message+"\n";
+				clientStatus.val(message);
+			}
+			function updateServerResponse(message)
+			{
+				var serverResponse=$("#serverResponse");
+				message=serverResponse.val()+message+"\n";
+				serverResponse.val(message);
+			}
+		</script>
+	</head>
+	<body>
+		<table border=0>
+			<tr>
+				<td style="text-align:right">
+					WebSocket Server address:
+				</td>
+				<td>
+					<input type=text id="serverAddress" value="ws://localhost:4466/websocket">
+					<button onclick="connect()">Connect</button>
+					<button onclick="disConnect()">Disconnect</button>
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align:right">
+					Message to be sent to server:
+				</td>
+				<td>
+					<input type="text" id="msg">
+					<button onclick="sendMessage()">Send</button>
+				</td>
+			</tr>
+		</table>
+		<table width="100%">
+			<tr>
+				<td>
+					Client Side Status<br>
+					<textarea id="status" rows=40 cols=80 readonly style="width:100%">
+					</textarea>
+				</td>
+				<td>
+					Server Response<br>
+					<textarea id="serverResponse" readonly rows=40 cols=80 style="width:100%">
+					</textarea>
+				</td>	
+			</tr>
+		</table>	
+	</body>
+</html>	
