@@ -26,6 +26,12 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrame;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * It is websocket request handler.
+ * It can handle text request only.
+ * @author SITO3
+ *
+ */
 public class WebSocketFrameHandler extends SimpleChannelInboundHandler<WebSocketFrame>
 {
 	private MessageCoder messageCoder;
@@ -46,6 +52,7 @@ public class WebSocketFrameHandler extends SimpleChannelInboundHandler<WebSocket
 	public void channelActive(ChannelHandlerContext ctx)
             throws java.lang.Exception
     {
+		//Once the connection is established, init. the message coder.
 		try 
 		{
 			messageCoder=new MessageCoder();
@@ -60,6 +67,7 @@ public class WebSocketFrameHandler extends SimpleChannelInboundHandler<WebSocket
 		requestString = ((TextWebSocketFrame) frame).text();
 		if (isFirstConnect)
 		{
+			//if first connect,
 			String messageKey=messageCoder.key;
 			String ivText=messageCoder.ivText;
 			Cipher rsaCipher;
@@ -69,17 +77,18 @@ public class WebSocketFrameHandler extends SimpleChannelInboundHandler<WebSocket
 			byte[] publicBytes = Base64.decode(requestString);
 			X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicBytes);
 			KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-			rsaCipher.init(Cipher.ENCRYPT_MODE,keyFactory.generatePublic(keySpec));
+			rsaCipher.init(Cipher.ENCRYPT_MODE,keyFactory.generatePublic(keySpec)); // init. the RSA coder
 			responseString ="{\"messageKey\":\""+messageKey+"\",";
 			responseString+="\"ivText\":\""+ivText+"\"}";
-			responseString =new String(Base64.encode(rsaCipher.doFinal(responseString.getBytes("UTF-8"))));
+			responseString =new String(Base64.encode(rsaCipher.doFinal(responseString.getBytes("UTF-8")))); //encrypt the AES key 
 			isFirstConnect=false;
 		}
 		else
 		{
+			//For simplicity, just send back incoming message only.
 			requestString=messageCoder.decode(requestString);
 			responseString=messageCoder.encode(requestString);
 		}
-		ctx.channel().writeAndFlush(new TextWebSocketFrame(responseString));
+		ctx.channel().writeAndFlush(new TextWebSocketFrame(responseString));// send the response to client
 	}
 }

@@ -29,6 +29,14 @@ import javax.crypto.spec.IvParameterSpec;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * 
+ * @author SITO3
+ * This is AES message Coder.
+ * It provide 2 functions:
+ *    -decode message from client.
+ *    -encode message that to be sent to client.
+ */
 public class MessageCoder 
 {
 	//private static int AES_KEY_SIZE = 256 ;
@@ -57,11 +65,27 @@ public class MessageCoder
 		ivText=Base64.getEncoder().encodeToString(iv);
 		key=Base64.getEncoder().encodeToString(aesKey.getEncoded());		
     }
+    /**
+     * It is used to encode message that to be sent to client
+     * @param message
+     * @return encoded message
+     * @throws IllegalBlockSizeException
+     * @throws BadPaddingException
+     * @throws UnsupportedEncodingException
+     */
     public String encode(String message) throws IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException
     {
     	byte[] cipherTextInByteArr = cipher.doFinal(message.getBytes("UTF-8"));
     	return Base64.getEncoder().encodeToString(cipherTextInByteArr);
     }
+    /**
+     * It is used to decode message from client.
+     * @param encodedText
+     * @return decoded message
+     * @throws IllegalBlockSizeException
+     * @throws BadPaddingException
+     * @throws UnsupportedEncodingException
+     */
     public String decode(String encodedText) throws IllegalBlockSizeException, BadPaddingException, UnsupportedEncodingException
     {
     	byte[] cipherTextInByteArr =Base64.getDecoder().decode(encodedText);

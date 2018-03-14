@@ -21,7 +21,13 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+/**
+ * This is an simplified WebSocketServerInitializer.
+ * It does not handle invalid URI request.
+ * According to rfc6455, the websocket should handle the invalid URI request.
+ * @author SITO3
+ *
+ */
 public class WebSocketServerInitializer extends ChannelInitializer<SocketChannel> 
 {
 	private static final String WEBSOCKET_PATH = "/websocket";

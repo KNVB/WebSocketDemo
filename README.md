@@ -4,13 +4,13 @@ This is an simplified web socket application demonstration.
 ## Background
 [Wikipedia](https://en.wikipedia.org/wiki/WebSocket) describe WebSocket as the following:
 
-_WebSocket providing full-duplex communication channels over a single TCP connection.
+_"WebSocket providing full-duplex communication channels over a single TCP connection.
 WebSocket is a different TCP protocol from HTTP. 
 Both protocols are located at layer 7 in the OSI model and, as such, depend on TCP at layer 4. 
 Although they are different, RFC 6455 states that WebSocket "is designed to work over HTTP ports 80 and 443 
 as well as to support HTTP proxies and intermediaries" thus making it compatible with the HTTP protocol. 
 To achieve compatibility, the WebSocket handshake uses the HTTP Upgrade to change from the HTTP protocol 
-to the WebSocket protocol._
+to the WebSocket protocol."_
 
 WebSocket connection can be established in both insecure (i.e. ws://) and secure (i.e. wss://) way.
 In order to establish a secure websocket connection (i.e. wss://), the server is required 
@@ -30,10 +30,13 @@ Through this flow, we can establish a secure connection on an insecure channel.
 ## Server side
 The server side program is written in Java.
 In this project the following Java library/Framework are used:
+
 1. [Netty network application framework](http://netty.io/) 
 2. [Bouncy Castle](https://www.bouncycastle.org/)
 
 ## Client Side
 The client program is written in Javascript.
+In this project the following Javascript library are used:
 
-[CryptoJS](https://code.google.com/archive/p/crypto-js/) library is used in this project.
+1. [CryptoJS](https://code.google.com/archive/p/crypto-js/)
+2. [jQuery](https://jquery.com/)

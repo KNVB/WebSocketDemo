@@ -14,11 +14,14 @@
 				constructor(url)
 				{
 					this.ws;
-					this.messageCoder;
+					this.messageCoder; //This is message coder object. 
 					this.decodedMessage;
 					this.url=url;
 					this.isFirstConnect=true;
 				}
+				/*
+				 Connect to Websocket server
+				*/
 				connect()
 				{
 					var self=this;
@@ -43,6 +46,9 @@
 										updateClientStatus("Connection closed,closeEvent.wasClean:"+e.wasClean);
 									}
 				}
+				/**
+				 *Disconnect from server 
+				*/
 				disConnect()
 				{
 					if (this.ws != null)
@@ -52,6 +58,9 @@
 						updateClientStatus("Connection closed.");
 					}
 				}
+				/*
+				 Send public key to server
+				*/
 				sendPublicKey()
 				{
 					updateClientStatus("Connection established.");
@@ -60,30 +69,42 @@
 					});
 					var dt = new Date();
 					var time = -(dt.getTime());
-					this.keyCoder.getKey();
-					this.ws.send(this.keyCoder.getPublicKey());
+					this.keyCoder.getKey(); //Generate the RSA key pair
+					this.ws.send(this.keyCoder.getPublicKey()); //Send public key to server 
 					updateClientStatus("Public key sent.");
 					this.keyCoder.setPrivateKey(this.keyCoder.getPrivateKey());
 				}
+				/*
+				  Send message to server
+				*/
 				sendMessage(message)
 				{
 					var self=this;
 					this.ws.send(this.messageCoder.encode(message));
 				}
+				/**
+				 Get message from server, and then decode the message 
+				*/
 				getServerResponse()
 				{
 					var self=this;
+					
+					//Using Promise mechanism to perform call back function after the message is received from the server.
 					return new Promise((resolve, reject) =>{
 							self.ws.onmessage = (e) =>{
 								var serverResponseMessage = e.data;
-								resolve(self.messageCoder.decode(serverResponseMessage));
+								resolve(self.messageCoder.decode(serverResponseMessage)); //send the decoded message to call back function.
 							}
 						});
 				}
+				/**
+				 Init. the message coder
+				*/
 				initCoder()
 				{
 					var self=this;
 					
+					//Using Promise mechanism to perform call back function after the message code initialized completed.
 					return new Promise((resolve, reject) => {
 						self.ws.onmessage = (e) => {
 							var serverResponseMessage = e.data;
@@ -96,35 +117,49 @@
 					})
 				}							
 			}
-			
+//------------------------------------------------------------------------------------------------------------------------------			
+			/*
+			 Connect to Websocket server
+			*/
 			function connect()
 			{
-				$("#status").val("");
-				$("#serverResponse").val("");
-				var serverAddress=document.getElementById("serverAddress").value; 
-				webSocketServer=new WebSocketServer(serverAddress);
+				$("#status").val(""); // Clear the "Client Side Status" textarea
+				$("#serverResponse").val(""); // Clear the "Server Response" textarea
+				
+				var serverAddress=document.getElementById("serverAddress").value; //get the websocket server address 
+				webSocketServer=new WebSocketServer(serverAddress); //instantiate a websocket object
 				webSocketServer.connect();
 			}
+			/*
+			 Send message to server
+			*/
 			function sendMessage()
 			{
 				var message=document.getElementById("msg").value;
 				webSocketServer.sendMessage(message);
 				updateClientStatus("Message="+message+" sent to server.");
-				webSocketServer.getServerResponse().then(function(data)
+				webSocketServer.getServerResponse().then(function(data) //Get server response and then update the "Server Response" textarea
 											{
 												updateServerResponse(data);
 											});
-			}			
+			}
+			/**
+			 *Disconnect from server 
+			*/
 			function disConnect()
 			{
 				webSocketServer.disConnect();
 			}
+			
+			// Add content to the "Client Side Status" textarea
 			function updateClientStatus(message)
 			{
 				var clientStatus=$("#status");
 				message=clientStatus.val()+message+"\n";
 				clientStatus.val(message);
 			}
+			
+			// Add content to the "Server Response" textarea
 			function updateServerResponse(message)
 			{
 				var serverResponse=$("#serverResponse");
