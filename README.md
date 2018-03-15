@@ -20,8 +20,8 @@ In this example, I implement server in another way:
 1. Client (i.e Web browser) make a connection in insecure way(i.e. ws://)
 2. Once the connection is established, the Web Browser generated a RSA key pair.
 3. the Web Browser send the RSA public key to server.
-4. The server encrypt an AES key with the RSA key, and then send back to the browser side.
-5. The browser decode the server response with the private key.
+4. The server encrypt an AES key with the RSA public key, and then send back to the browser side.
+5. The browser decode the server response with the RSA private key.
 6. And then extract the AES key from the server response.
 7. From this point, the communication between server and client in both direcction can be encrypted by AES key.
 
@@ -40,3 +40,5 @@ In this project the following Javascript library are used:
 
 1. [CryptoJS](https://code.google.com/archive/p/crypto-js/)
 2. [jQuery](https://jquery.com/)
+
+The Websocket object using ES6 promise mechanism to make the object easy to use.
