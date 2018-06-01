@@ -16,14 +16,14 @@ WebSocket connection can be established in both insecure (i.e. ws://) and secure
 In order to establish a secure websocket connection (i.e. wss://), the server is required 
 to install certificate from trust source.
 
-In this example, I implement server in another way:
+In this example, I implement the server in another way:
 1. Client (i.e Web browser) make a connection in insecure way(i.e. ws://)
-2. Once the connection is established, the Web Browser generated a RSA key pair.
-3. the Web Browser send the RSA public key to server.
-4. The server encrypt an AES key with the RSA public key, and then send back to the browser side.
-5. The browser decode the server response with the RSA private key.
+2. Once the connection is established, the Web Browser generated an RSA key pair.
+3. the Web Browser sends the RSA public key to the server.
+4. The server encrypts an AES key with the RSA public key, and then send back to the browser side.
+5. The browser decodes the server response with the RSA private key.
 6. And then extract the AES key from the server response.
-7. From this point, the communication between server and client in both direcction can be encrypted by AES key.
+7. From this point, the communication between server and client in both direction can be encrypted by AES key.
 
 Through this flow, we can establish a secure connection on an insecure channel.
 
