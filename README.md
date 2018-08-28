@@ -19,7 +19,7 @@ to install certificate from trust source.
 In this example, I implement the server in another way:
 1. Client (i.e Web browser) make a connection in insecure way(i.e. ws://)
 2. Once the connection is established, the Web Browser generated an RSA key pair.
-3. the Web Browser sends the RSA public key to the server.
+3. The Web Browser sends the RSA public key to the server.
 4. The server encrypts an AES key with the RSA public key, and then send back to the browser side.
 5. The browser decodes the server response with the RSA private key.
 6. And then extract the AES key from the server response.
